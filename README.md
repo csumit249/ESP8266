@@ -287,5 +287,5 @@ Ping is a great tool to check if the ESP (or any device, really) is still connec
 #### Automatically connect to the strongest network
   <H6> The sketch above might be enough for your specific application, but if you need to be able to connect to multiple Wi-Fi networks, for example the Wi-Fi at home and the Wi-Fi at the office, it won't work.
 To solve this problem, we'll use the Wi-Fi-Multi library: You can add as many networks as you like, and it automatically connects to the one with the strongest signal.
-#### Refer to station controller/ Data 2
+#### Refer to station controller/ Code 2
    
