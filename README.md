@@ -312,3 +312,11 @@ The DNS lookup happens completely in the background: when you go to a website in
 Fortunately, there's another way: multicast DNS, or mDNS.
 mDNS uses domain names with the .local suffix, for example http://esp8266.local. If your computer needs to send a request to a domain name that ends in .local, it will send a multicast query to all other devices on the LAN that support mDNS, asking the device with that specific domain name to identify itself. The device with the right name will then respond with another multicast and send its IP address. Now that your computer knows the IP address of the device, it can send normal requests.
       
+##### refer mDNS Code 2
+   <H6> Upload it and open ping again. Try to ping to esp8266.local:
+![image](https://user-images.githubusercontent.com/42414598/134766046-5416d621-47a7-463a-bc5e-717ac88b3d3d.png)
+    
+<H6> mDNS is supported on Windows, OSX, Linux and iOS, but not (yet?) on Android.
+It's a real shame that Android doesn't support it, you can help by starring this issue report for the Chromium project to ask for mDNS support in Chrome on Android.
+
+Of course, you can change the domain name of the ESP by changing the parameter of MDNS.begin.
