@@ -279,7 +279,7 @@ Ping is a great tool to check if the ESP (or any device, really) is still connec
  
 ![image](https://user-images.githubusercontent.com/42414598/134765688-9072cf66-6a5c-42ec-a90a-82e21455aeba.png)
 
- <h6> The device with the antenna serves many different purposes:
+<h6> The device with the antenna serves many different purposes:
 * Access point: Other Wi-Fi devices can connect to it, to be part of the local network.
 * Router: It routes IP packets to the right sub-nets so that they will arrive at their destination. E.g. if the computer sends a message that is meant for the ESP over the Ethernet sub-net, the router will send the packet to the Wi-Fi sub-net, because it knows that's where the ESP is.
 * Modem: if the router can't find the addressee on the local network, the packet will be passed on to the integrated modem, and it will be sent to the Internet Service Provider over a DSL line, heading for the Internet, where lots of other routers will try to get the packet to the right destination.
@@ -296,9 +296,9 @@ However, if you try to go to an online website, you'll get a timeout or a DNS er
 If you connected a second station to the ESP access point on the other hand, you would be able to ping from one station to the other without problems, because they're on the same network.
    
     
-    ## Multicast Domain Name System
-    ### DNS
-    <H6> Let's face it, constantly typing IP addresses is really cumbersome, and it would be impossible to remember all your favorite websites' addresses, especially if they use IPv6.
+ ## Multicast Domain Name System
+  ### DNS
+   <H6> Let's face it, constantly typing IP addresses is really cumbersome, and it would be impossible to remember all your favorite websites' addresses, especially if they use IPv6.
 That's why domain names were introduced: a simple string of text that's easy to remember, for example www.google.com.
 
 However, to send a request to a website, your computer still needs to know its IP address. That's where DNS comes in. It stands for Domain Name System, and is a way to translate a website's domain name to its IP address. On the Internet, there are a lot of DNS servers. Each DNS server has a long list of domain names and their corresponding IP addresses. Devices can connect to a DNS server and send a domain name, the DNS server will then respond with the IP address of the requested site.
@@ -306,17 +306,44 @@ You could compare it to a telephone directory: you can look up a name to find th
 
 The DNS lookup happens completely in the background: when you go to a website in your browser, it will first send a request to a DNS server (this implies that the computer knows the IP address of the DNS server itself), wait for the response of the lookup, and then send the actual request to the right IP address.
      
-     ### mDNS
-     <H6> DNS works great for normal sites on the Internet, but most local networks don't have their own DNS server. This means that you can't reach local devices using a domain name, and you're stuck using IP addresses ...
+### mDNS
+ <H6> DNS works great for normal sites on the Internet, but most local networks don't have their own DNS server. This means that you can't reach local devices using a domain name, and you're stuck using IP addresses ...
 
 Fortunately, there's another way: multicast DNS, or mDNS.
 mDNS uses domain names with the .local suffix, for example http://esp8266.local. If your computer needs to send a request to a domain name that ends in .local, it will send a multicast query to all other devices on the LAN that support mDNS, asking the device with that specific domain name to identify itself. The device with the right name will then respond with another multicast and send its IP address. Now that your computer knows the IP address of the device, it can send normal requests.
       
 ##### refer mDNS Code 2
-   <H6> Upload it and open ping again. Try to ping to esp8266.local:
+<H6> Upload it and open ping again. Try to ping to esp8266.local: 
+
 ![image](https://user-images.githubusercontent.com/42414598/134766046-5416d621-47a7-463a-bc5e-717ac88b3d3d.png)
     
 <H6> mDNS is supported on Windows, OSX, Linux and iOS, but not (yet?) on Android.
 It's a real shame that Android doesn't support it, you can help by starring this issue report for the Chromium project to ask for mDNS support in Chrome on Android.
 
 Of course, you can change the domain name of the ESP by changing the parameter of MDNS.begin.
+ 
+ ## ESP8266 Web ServerBeing able to ping the ESP is quite an achievement if you look at it from a technical point of view, but for most people, it's not that exciting, and not really useful.
+ <H6> In this chapter, I'll cover the basics of a web server, and teach you how to host a web page on the ESP.
+  #### Web servers
+  <H6> A web server is an Internet-connected device that stores and serves files. Clients can request such a file or another piece of data, and the server will then send the right data/files back to the client. Requests are made using HTTP.
+### HTTP
+ <H6> HTTP or the Hypertext Transfer Protocol is the text-based protocol used to communicate with (web) servers. There are multiple HTTP request methods, but I'll only cover the two most widely used ones: GET and POST.
+
+### HTTP GET
+ <H6> GET requests are used to retrieve data from a server, a web page for instance. It shouldn't change anything on the server, it just gets the data from the server, without side effects.
+When you open a webpage in your browser, it will take the URL and put it in an HTTP GET request. This is just plain text. Then it will send the request to the right server using TCP. The server will read the request, check the URL, and send the right HTTP response for that URL back to the browser.
+
+### HTTP POST
+ <H6> POST requests are used to send data to the server, for example, to send your user name and password to the server when you log in, or when you upload a photo. Unlike GET, POST can change the data on the server or the state of the server. POST has a body that can contain data that is sent to the server.
+  
+### HTTP status codes
+ <H6> A server should answer all requests with an HTTP status code. This is a 3-digit number indicating if the request was successful or telling the client what went wrong. Here's a table with some of the most important and useful ones.
+
+![image](https://user-images.githubusercontent.com/42414598/134766609-c94a64c5-bd5f-40e8-b06c-6c61ca2708db.png)
+  
+### TCP & UDP Ports
+ <H6> In most cases, one device has many different services, for example, a web server, an email server, an FTP server, a Spotify streaming service. If the device had just an IP address, it would be impossible to know which application a packet was sent to. That's why every service has a port number. It's an identifier for all different services or applications on a single device. In the example above, the web server will only listen for requests on port 80, the email server only on port 25, the FTP server only on port 20, Spotify will only receive streams on port 4371. To specify a certain port, you can use a colon after the IP address of after the domain name. But most of the time, you don't have to add it explicitly. For example, all web servers listen on port 80, so a web browser will always connect to port 80.
+  
+## ESP8266 First Web Server
+  <H6> The actual implementation of a web server is much easier than it sounds, because the ESP8266 Arduino Core includes some great libraries that handle pretty much everything for you. Let's look at a basic Hello World! example.
+<H5> REFER TO ESP2866 FIRST WEB SERVER / CODE1
