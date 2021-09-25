@@ -204,4 +204,88 @@ If your loop takes longer than this, you will have to explicitly give CPU time t
 
 From a microcontroller’s perspective however, 3 seconds is a very long time (240 million clockcycles), so unless you do some extremely heavy number crunching, or sending extremely long strings over Serial, you won’t be affected by this. Just keep in mind that you add the yield(); inside your for or while loops that could take longer than, say 100ms.
     
+## Wi-Fi
+<H6> Using the ESP8266 as a simple microcontroller is great, but the reason why most people use it, is its Wi-Fi capabilities. In this chapter, we'll dive into the wonderful world of network protocols, like Wi-Fi, TCP, UDP, HTTP, DNS ... All these acronyms might intimidate you, but I'll try my best to explain them step-by-step and in an easy way. Some paragraphs are in italic. These provide some extra information, but are not critical to understanding the ESP's Wi-Fi functions, so don't get frustrated if there are things you don't understand.
+### The TCP/IP stack
+<H6> The system most people refer to as 'The Internet' isn't just one protocol: it's an entire stack of layers of protocols, often referred to as the TCP/IP stack. We'll go over these different layers, because we need to understand how our ESP8266 communicates with other devices on the network.
+![image](https://user-images.githubusercontent.com/42414598/134765059-a6bca7e5-9fb3-4981-a9aa-a855a18333c9.png)
+ 
+ ### The Link Layer
+ <H6> The link layer contains the physical link between two devices, an Ethernet cable, for example, or a Wi-Fi connection. This is the layer that is closest to the hardware. To connect an ESP8266 to the network, you have to create a Wi-Fi link. This can happen in two different ways:
+* The ESP8266 connects to a wireless access point (WAP or simply AP). The AP can be built-in to your modem or router, for example. In this configuration, the ESP acts like a wireless station.
+* The ESP8266 acts as an access point and wireless stations can connect to it. These stations could be your laptop, a smartphone, or even another ESP in station mode.
+Once the Wi-Fi link is established, the ESP8266 is part of a local area network (LAN). All devices on a LAN can communicate with each other. Most of the time, the AP is connected to a physical Ethernet network as well, this means that the ESP8266 can also communicate with devices that are connected to the AP (modem/router) via a wired Ethernet connection (desktop computers, gaming consoles and set-top boxes, for instance).
+If the ESP8266 is in access point mode, it can communicate with any station that is connected to it, and two stations (e.g. a laptop and a smartphone) can also communicate with each other.
+The ESP can be used in AP-only, station-only, or AP+station mode.
+  
+## Uploading sketches to the ESP8266
+### Manual reset and manual program
+  <H6> This only applies to boards without an on-board USB-to-Serial converter.
+If you don't have a USB-to-Serial converter with DTR and RTS lines, you could also just use the reset and program buttons we added in the hardware chapter. To get the ESP in program mode, GPIO0 must be low while booting:
+1. press and hold the reset button
+2. press and hold the program button
+3. release the reset button, the ESP will boot in program mode
+4. release the program button
+5. upload the sketch
+
+If you want to get out of program mode without uploading, just press reset (without pressing the program button).
+   
+### Board Options 
+   <H6> If your specific board is in the Tools > Board list (e.g. NodeMCU, SparkFun and Adafruit boards), you can just select it, and you will get the right settings. When your board isn't in the list, you'll have to select a Generic ESP8266. In that case there's lots of new options in the Tools menu of the Arduino IDE, so let's go over them and pick the right settings.
+   
+#### Flash Mode
+   <H6> Like I said before, the ESP8266 uses an external flash chip for storage. You can communicate with this chip over 2 datalines (DIO), or over all 4 datalines (QIO). Using 4 lines is two times faster than 2 lines, so in most cases, you should choose QIO. (If you're doing some advanced stuff and you need 2 more GPIO pins, you could use 2 lines instead of 4, and use the 2 lines as I/O. Most modules don't give you access to these pins, though. )
+
+#### Flash Size 
+   <H6> Different boards/modules have different sizes of flash chips on board. There are boards with 512kB, 1MB, 2MB and 4MB of flash. To know how much flash your board has, you can try the Examples > ESP8266 > CheckFlashConfig to see if your flash setting is correct, or you can check the specifications of your specific board online.
+You can also select the SPIFFS (SPI Flash File System) size. The SPIFFS partition is a small file system to store files. If you're not using it, you can select the minimum. Later on in the article, we'll use SPIFFS, and I'll remind you to select a larger SPIFFS size, but for now, it doesn't really matter.
+
+#### Debug port
+   <H6> There's a load of things going on when the ESP is running: Things like Wi-Fi connections, TCP connections, DNS lookups . All these small tasks produce a whole lot of debug output to help you troubleshoot. However, in a normal situation, where your program is behaving as expected, you don't need all those debug messages to flood the Serial Monitor, so you can just turn them off by selecting 'Disabled'.
+
+#### Debug Level
+   <H6> This allows you to choose what kind of debug messages you want to show.
+
+#### Reset Method
+   <H6> As mentioned in the paragraphs above, there are different methods for auto-reset and auto-program. If you're using the first method (using the edge detector), you should use 'ck', if you use the two-transistor circuit, select 'nodemcu'.
+
+#### Flash Frequency
+   <H6> If you need some extra memory speed, you could change the flash frequency from 40MHz to 80MHz. This is the clock frequency of the SPI/SDIO link.
+
+#### CPU Frequency
+   <H6> If you need some extra CPU performance, you can double the clock speed from 80MHz to 160MHz. It's actually an overclock, but I've never had any issues or instability.
     
+#### Upload Speed
+   <H6> The baud rate for uploading to the ESP. The default is 115200 baud, but you can go higher (if you're changing your sketch a lot, it might be too slow). 921600 baud works most of the time, but you may get an error sometimes, if that's the case, switching back to 115200 will probably solve all problems.
+
+## Establishing a Wi-Fi connection
+ <H6> Like I mentioned in the previous chapter, the ESP8266 can operate in three different modes: Wi-Fi station, Wi-Fi access point, and both at the same time. We'll start by looking at the configuration of a Wi-Fi station.
+  
+### REFER STATION MODE/ DATA 
+ <H6> The code to connect to a wireless access point is relatively straightforward: enter the SSID and the password of the network you want to connect to, and call the WiFi.begin function. Then wait for the connection to complete, et voilà, your ESP8266 is now connected to your Local Area Network.
+#### PROOF 
+<H6> open the Serial monitor (CTRL+SHIFT+M) and upload the sketch. You should see something like this:
+![image](https://user-images.githubusercontent.com/42414598/134765563-35b38ee3-7fc3-4aed-90d1-e28ed8fb1509.png)
+ 
+ <H6> Now go to your computer and open up a terminal: On Windows, search for "Command Prompt", on Mac or Linux, search for "Terminal". You could also use the shortcuts: on Windows, hit  + R, type "cmd" and hit enter, on Linux, use CTRL+ALT+T .
+
+Next, type ping , and then the IP address you received in the Serial monitor. If you're on Mac or Linux, use CTRL+C to stop it after a couple of lines. The output should look something like this:
+![image](https://user-images.githubusercontent.com/42414598/134765582-6e8d199e-204f-4d77-a478-8369738d79ab.png)
+
+<H6> The ping command sends small packets to the IP address of the ESP8266. When the ESP receives such a packet, it sends it back to the sender. Ping is part of the second layer of the TCP/IP stack, the Internet layer. It relies on both the Data Link layer (Wi-Fi) and the Internet Protocol*.
+You can see that in the example above, we sent 6 packets to the ESP, and we also received 6 response (echo) packets. This tells us that the Data Link, the Wi-Fi connection, and the Internet Protocol are working correctly.
+ We now know that the ESP can successfully communicate with other devices on the network, and if your local network is online (if it is connected to the Internet via your modem), the ESP can also communicate with any device on the web.
+Ping is a great tool to check if the ESP (or any device, really) is still connected to the network, and if it's still working fine.
+ 
+![image](https://user-images.githubusercontent.com/42414598/134765688-9072cf66-6a5c-42ec-a90a-82e21455aeba.png)
+
+ <h6> The device with the antenna serves many different purposes:
+* Access point: Other Wi-Fi devices can connect to it, to be part of the local network.
+* Router: It routes IP packets to the right sub-nets so that they will arrive at their destination. E.g. if the computer sends a message that is meant for the ESP over the Ethernet sub-net, the router will send the packet to the Wi-Fi sub-net, because it knows that's where the ESP is.
+* Modem: if the router can't find the addressee on the local network, the packet will be passed on to the integrated modem, and it will be sent to the Internet Service Provider over a DSL line, heading for the Internet, where lots of other routers will try to get the packet to the right destination.
+  
+#### Automatically connect to the strongest network
+  <H6> The sketch above might be enough for your specific application, but if you need to be able to connect to multiple Wi-Fi networks, for example the Wi-Fi at home and the Wi-Fi at the office, it won't work.
+To solve this problem, we'll use the Wi-Fi-Multi library: You can add as many networks as you like, and it automatically connects to the one with the strongest signal.
+#### Refer to station controller/ Data 2
+   
