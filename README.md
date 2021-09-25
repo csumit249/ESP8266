@@ -1,1 +1,207 @@
 # ESP8266
+ ## Introduction to the ESP8266
+  ### What is an ESP8266 ?
+   <H6> The ESP8266 is a System on a Chip (SoC), manufactured by the Chinese company Espressif. It consists of a Tensilica L106 32-bit micro controller unit (MCU) and a Wi-Fi transceiver. It has 11 GPIO pins* (General Purpose Input/Output pins), and an analog input as well. This means that you can program it like any normal Arduino or other microcontroller. And on top of that, you get Wi-Fi communication, so you can use it to connect to your Wi-Fi network, connect to the Internet, host a web server with real web pages, let your smartphone connect to it.
+  
+  ### Programming
+   <H6> there are different ways to program the ESP8266, but I'll only cover the method using the Arduino IDE. This is really easy for beginners, and it's a very familiar environment if you've used Arduino boards before. Just keep in mind that it's not limited to this option: there's also an official SDK available to program it in real C, this is very useful if you want to optimize your code or do some advanced tricks that aren't supported by the Arduino IDE. Another possibility is to flash it with a LUA interpreter, so you can upload and run LUA scripts.
+
+  ### Requirememnt 
+  <H6>
+  
+* An ESP8266 board
+* A computer that can run the Arduino IDE (Windows, Mac or Linux)
+* A USB-to-Serial converter, it is very important that you use a 3.3V model
+* A USB cable
+* A 3.3V power supply or voltage regulator
+* A Wi-Fi network
+ 
+ ## Hardware
+![image](https://user-images.githubusercontent.com/42414598/134762521-a0a2836a-76cb-4f9b-8ab5-e5f6a233e48c.png)
+![image](https://user-images.githubusercontent.com/42414598/134762630-2e93cfee-4836-44ca-9ba7-03d2d1b7061f.png)
+
+  ### Development boards
+  <H6>
+    
+  Some boards have all kinds of features on-board to help developing ESP8266 hardware and software: for example, a USB to Serial converter for programming, a 3.3V regulator for power, on-board LEDs for debugging, a voltage divider to scale the analog input etc.
+  
+  ### Bare-bones AI Thinker boards
+   <H6>
+ If you want to add an ESP8266 to a small project, or if you want a cheaper* board, you might want to buy a board that doesn't have these features. In that case, you can buy one of the many ESP-## modules developed by AI Thinker. They contain just the ESP8266 and the necessary components to run it. To program the board, you'll need an external USB-to-Serial converter. With some modules, you get an on-board antenna (PCB or ceramic) and an LED, some boards have just an antenna connector, or no LEDs at all. They also differ in physical size, and flash memory size. An important thing to notice, is that some boards do not break out all GPIO pins. For example. the ESP-01 only has 2 I/O pins available (apart from the TX and RX pins), while other modules like the ESP-07 or ESP-12 break out all available I/O pins.
+
+  ### Getting Hardware Ready 
+   <H6> There are two main categories of ESP8266 boards: development boards with a USB interface (USB-to-Serial convertor) on-board, and boards without a USB connection.
+     
+  #### Connecting the USB-to-Serial converter
+   <H6>
+     
+1. Connect the ground (GND) of the USB-to-Serial converter to the ground of the ESP8266.
+2. Connect the RX-pin of the USB-to-Serial converter to the TXD pin of the ESP8266. (On some boards, it's labelled TX instead of TXD, but it's the same pin.)
+3. Connect the TX-pin of the USB-to-Serial converter to the RXD pin of the ESP8266. (On some boards, it's labelled RX instead of RXD, but it's the same pin.)
+4. If your ESP8266 board has a DTR pin, connect it to the DTR pin of the USB-to-Serial converter. This enables auto-reset when uploading a sketch, more on that later.
+     
+  #### Enabling the chip
+   <H6>
+If you're using a bare-bone ESP-## board by AI Thinker, you have to add some resistors to turn on the ESP8266, and to select the right boot mode.
+   
+1. Enable the chip by connecting the CH_PD (Chip Power Down, sometimes labeled CH_EN or chip enable) pin to VCC through a 10KΩ resistor.
+2. Disable SD-card boot by connecting GPIO15 to ground through a 10KΩ resistor.
+3. Select normal boot mode by connecting GPIO0 to VCC through a 10KΩ resistor.
+4. Prevent random resets by connecting the RST (reset) pin to VCC through a 10KΩ resistor.
+5. Make sure you don't have anything connected to GPIO2 (more information in the next chapter).
+     
+  #### Adding reset and program buttons
+   <H6>
+
+If your ESP8266 board doesn't have a reset button, you could add one by connecting a push button to between the RST pin and ground.
+
+To put the chip into programming mode, you have to pull GPIO0 low during startup. That's why we also need a program button. Because it's possible to use GPIO0 as an output, we can't directly short it to ground, that could damage the chip. To prevent this, connect 470Ω resistor in series with the switch. It's important that this resistance is low enough, otherwise, it will be pulled high by the 10KΩ resistor we added in the previous paragraph.
+  
+  #### Connecting the power supply
+   <H6>
+     
+If the ESP8266 module you have doesn't have a 3.3V voltage regulator on board, you have to add one externally. You could use an LM1117-3.3 for example.
+1. Connect the first pin of the regulator to ground.
+2. Place a 10µF capacitor between pin 2 (Vout) and ground. Watch the polarity!
+3. Place a 10µF capacitor between pin 3 (Vin) and ground.
+4. Connect pin 2 to the 3.3V or VCCof the ESP8266.
+5. Connect pin 3 to a 5V power source, a USB port, for example.
+     
+  #### Connecting the power supply
+   <H6> If the ESP8266 module you have doesn't have a 3.3V voltage regulator on board, you have to add one externally. You could use an LM1117-3.3 for example.
+     
+1. Connect the first pin of the regulator to ground.
+2. Place a 10µF capacitor between pin 2 (Vout) and ground. Watch the polarity!
+3. Place a 10µF capacitor between pin 3 (Vin) and ground.
+4. Connect pin 2 to the 3.3V or VCCof the ESP8266.
+5. Connect pin 3 to a 5V power source, a USB port, for example.
+
+![image](https://user-images.githubusercontent.com/42414598/134760641-f3efe507-bcc1-443c-892f-bc597aa29f94.png)
+![image](https://user-images.githubusercontent.com/42414598/134760646-cd7e7290-9609-4cc4-b60b-5dc22395e9bf.png)
+
+  ### Before you begin
+   <H6> There's a few things you have to look out for when using an ESP8266: The most important thing is that it runs at 3.3V, so if you connect it to a 5V power supply, you'll kill it. Unlike some 3.3V Arduino or Teensy boards, the ESP8266's I/O pins are not 5V tolerant, so if you use a 5V USB-to-Serial converter, or 5V sensors etc. you'll blow it up. A second thing to keep in mind is that the ESP8266 can only source or sink 12mA per output pin, compared to 20-40mA for most Arduinos. The ESP8266 has one analog to digital converter, but it has a strange voltage range: 0 - 1V, voltages above 1V might damage the board. One last thing to keep in mind is that the ESP8266 has to share the system resources and CPU time between your sketch and the Wi-Fi driver. Also, features like PWM, interrupts or I²C are emulated in software, most Arduinos on the other hand, have dedicated hardware parts for these tasks. For most applications however, this is not too much of an issue.
+
+ ## Software
+  ### Installation of the required software
+  <H6> The first step is to download and install the Arduino IDE. I explained this in A Beginner's Guide to Arduino. (As of February 7th 2017, the latest stable version of the IDE is 1.8.1.)
+
+To program the ESP8266, you'll need a plugin for the Arduino IDE, it can be downloaded from GitHub manually, but it is easier to just add the URL in the Arduino IDE:
+1. Open the Arduino IDE.
+2. Go to File > Preferences.
+3. Paste the URL http://arduino.esp8266.com/stable/package_esp8266com_index.json into the Additional Board Manager URLs field. (You can add multiple URLs, separating them with commas.)
+4. Go to Tools > Board > Board Manager and search for 'esp8266'. Select the newest version, and click install. (As of February 7th 2017, the latest stable version is 2.3.0.)
+    
+  ### Driver
+  <H6> If you are using a board with the CH340(G) USB-to-Serial chip, like the NodeMCU, you'll probably have to install the USB drivers for it. They can be found on GitHub. If you are using a board with the CP2104 USB-to-Serial chip, like the Adafruit Feather HUZZAH board, you'll probably have to install USB drivers as well. You can find them on the Silicon Labs website. Boards with an FTDI chip should work right out of the box, without the need of installing any drivers.
+
+ ### Python
+  <H6> If you want to use Over The Air updates on Windows, you have to install Python 2.7. You can download it from python.org. During the installation, you have to select the option to add Python to your path. If you don't do this, the Arduino IDE won't be able to find the Python executable.
+    
+ ## The ESP8266 as a microcontroller - Hardware
+  ### Digital I/O
+   <H6> Just like a normal Arduino, the ESP8266 has digital input/output pins (I/O or GPIO, General Purpose Input/Output pins). As the name implies, they can be used as digital inputs to read a digital voltage, or as digital outputs to output either 0V (sink current) or 3.3V (source current).
+     
+  #### Voltage and current restrictions
+   <H6> The ESP8266 is a 3.3V microcontroller, so its I/O operates at 3.3V as well. The pins are not 5V tolerant, applying more than 3.6V on any pin will kill the chip.
+
+The maximum current that can be drawn from a single GPIO pin is 12mA.
+
+  #### Usable pins
+   <H6> The ESP8266 has 17 GPIO pins (0-16), however, you can only use 11 of them, because 6 pins (GPIO 6 - 11) are used to connect the flash memory chip. This is the small 8-legged chip right next to the ESP8266. If you try to use one of these pins, you might crash your program.
+GPIO 1 and 3 are used as TX and RX of the hardware Serial port (UART), so in most cases, you can’t use them as normal I/O while sending/receiving serial data.
+     
+  #### Boot modes
+<H6> GPIO 0-15 all have a built-in pull-up resistor, just like in an Arduino. GPIO16 has a built-in pull-down resistor.
+As mentioned in the previous chapter, some I/O pins have a special function during boot: They select 1 of 3 boot modes:
+  
+  
+![image](https://user-images.githubusercontent.com/42414598/134761061-88cc3a31-cb07-4e77-bc60-20cb5db222e0.png)
+  
+Note: you don’t have to add an external pull-up resistor to GPIO2, the internal one is enabled at boot.
+
+We made sure that these conditions are met by adding external resistors in the previous chapter, or the board manufacturer of your board added them for you. This has some implications, however:
+
+* GPIO15 is always pulled low, so you can’t use the internal pull-up resistor. You have to keep this in mind when using GPIO15 as an input to read a switch or connect it to a device with an open-collector (or open-drain) output, like I²C.
+* GPIO0 is pulled high during normal operation, so you can’t use it as a Hi-Z input.
+* GPIO2 can’t be low at boot, so you can’t connect a switch to it.
+       
+  #### Internal pull-up/-down resistors
+<H6> GPIO 0-15 all have a built-in pull-up resistor, just like in an Arduino. GPIO16 has a built-in pull-down resistor.
+
+  ### PWM
+<H6> Unlike most Atmel chips (Arduino), the ESP8266 doesn’t support hardware PWM, however, software PWM is supported on all digital pins. The default PWM range is 10-bits @ 1kHz, but this can be changed (up to >14-bit@1kHz).
+       
+  ### Analog input
+<H6> The ESP8266 has a single analog input, with an input range of 0 - 1.0V. If you supply 3.3V, for example, you will damage the chip. Some boards like the NodeMCU have an on-board resistive voltage divider, to get an easier 0 - 3.3V range. You could also just use a trimpot as a voltage divider.
+The ADC (analog to digital converter) has a resolution of 10 bits.
+       
+ ### Communication
+  #### Serial 
+<H6> The ESP8266 has two hardware UARTS (Serial ports)
+UART0 on pins 1 and 3 (TX0 and RX0 resp.), and UART1 on pins 2 and 8 (TX1 and RX1 resp.), however, GPIO8 is used to connect the flash chip. This means that UART1 can only transmit data.
+UART0 also has hardware flow control on pins 15 and 13 (RTS0 and CTS0 resp.). These two pins can also be used as alternative TX0 and RX0 pins.
+    #### I²C
+       <H6> The ESP doesn’t have a hardware TWI (Two Wire Interface), but it is implemented in software. This means that you can use pretty much any two digital pins. By default, the I²C library uses pin 4 as SDA and pin 5 as SCL. (The data sheet specifies GPIO2 as SDA and GPIO14 as SCL.) The maximum speed is approximately 450kHz.
+    #### SPI
+       <H6> The ESP8266 has one SPI connection available to the user, referred to as HSPI. It uses GPIO14 as CLK, 12 as MISO, 13 as MOSI and 15 as Slave Select (SS). It can be used in both Slave and Master mode (in software).
+    ### GPIO overview
+![image](https://user-images.githubusercontent.com/42414598/134761263-23f06b7a-4ff5-48cb-bd42-600801d0c83a.png)
+
+ ## The ESP8266 as a microcontroller - Software
+  ### Digital I/O
+<H6> Just like with a regular Arduino, you can set the function of a pin using  
+  > __pinMode(pin, mode)__
+  
+<H6> where pin is the GPIO number, and mode can be either INPUT, which is the default, OUTPUT, or INPUT_PULLUP to enable the built-in pull-up resistors for GPIO 0-15. To enable the pull-down resistor for GPIO16, you have to use 
+  > __INPUT_PULLDOWN_16__
+
+To set an output pin high (3.3V) or low (0V), use 
+  > __digitalWrite(pin, value)__ 
+  
+  where pin is the digital pin, and value either 1 or 0 (or HIGH and LOW). To read an input, use 
+  > __digitalRead(pin)__
+
+To enable PWM on a certain pin, use 
+  > __analogWrite(pin, value)__ 
+  
+where pin is the digital pin, and value a number between 0 and 1023. You can change the range (bit depth) of the PWM output by using 
+  > __analogWriteRange(new_range)__
+
+The frequency can be changed by using 
+  > __analogWriteFreq(new_frequency)__
+  
+new_frequency should be between 100 and 1000Hz.
+  
+  ### Analog input
+<H6> Just like on an Arduino, you can use analogRead(A0) to get the analog voltage on the analog input. (0 = 0V, 1023 = 1.0V).
+The ESP can also use the ADC to measure the supply voltage (VCC). To do this, include ADC_MODE(ADC_VCC); at the top of your sketch, and use ESP.getVcc(); to actually get the voltage. If you use it to read the supply voltage, you can’t connect anything else to the analog pin.
+
+  ### Communication
+  #### Serial Communication
+<H6> To use UART0 (TX = GPIO1, RX = GPIO3), you can use the Serial object, just like on an Arduino: 
+
+  > Serial.begin(baud).
+
+To use the alternative pins (TX = GPIO15, RX = GPIO13), use Serial.swap() after 
+ 
+  > Serial.begin.
+
+To use UART1 (TX = GPIO2), use the Serial1 object.
+
+All Arduino Stream functions, like read, write, print, println, ... are supported as well.
+  
+  #### I²C and SPI
+<H6> You can just use the default Arduino library syntax, like you normally would.
+  
+  ### Sharing CPU time with the RF part
+  <H6> One thing to keep in mind while writing programs for the ESP8266 is that your sketch has to share resources (CPU time and memory) with the Wi-Fi- and TCP-stacks (the software that runs in the background and handles all Wi-Fi and IP connections).
+If your code takes too long to execute, and don’t let the TCP stacks do their thing, it might crash, or you could lose data. It’s best to keep the execution time of you loop under a couple of hundreds of milliseconds.
+
+Every time the main loop is repeated, your sketch yields to the Wi-Fi and TCP to handle all Wi-Fi and TCP requests.
+
+If your loop takes longer than this, you will have to explicitly give CPU time to the Wi-Fi/TCP stacks, by using including delay(0); or yield();. If you don’t, network communication won’t work as expected, and if it’s longer than 3 seconds, the soft WDT (Watch Dog Timer) will reset the ESP. If the soft WDT is disabled, after a little over 8 seconds, the hardware WDT will reset the chip.
+
+From a microcontroller’s perspective however, 3 seconds is a very long time (240 million clockcycles), so unless you do some extremely heavy number crunching, or sending extremely long strings over Serial, you won’t be affected by this. Just keep in mind that you add the yield(); inside your for or while loops that could take longer than, say 100ms.
+    
+    
