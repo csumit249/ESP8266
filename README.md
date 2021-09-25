@@ -288,5 +288,27 @@ Ping is a great tool to check if the ESP (or any device, really) is still connec
   <H6> The sketch above might be enough for your specific application, but if you need to be able to connect to multiple Wi-Fi networks, for example the Wi-Fi at home and the Wi-Fi at the office, it won't work.
 To solve this problem, we'll use the Wi-Fi-Multi library: You can add as many networks as you like, and it automatically connects to the one with the strongest signal.
 
-#### Refer to station controller/ Code 2
+##### Refer to station controller/ Code 2
+   <H6> To see if it works, open the Wi-Fi settings on your computer, look for a network called "ESP8266 Access Point", enter the password "thereisnospoon", and connect to it. Then open a terminal, and ping to 192.168.4.1 (this is the default IP address of our ESP AP). You'll see that the ESP responds to your pings.
+
+However, if you try to go to an online website, you'll get a timeout or a DNS error. This is because the ESP itself is not connected to the internet. The sub-net that consists of the ESP and the computer is not connected to any other networks, so there's no way for a packet on this network to make it to the Internet.
+
+If you connected a second station to the ESP access point on the other hand, you would be able to ping from one station to the other without problems, because they're on the same network.
    
+    
+    ## Multicast Domain Name System
+    ### DNS
+    <H6> Let's face it, constantly typing IP addresses is really cumbersome, and it would be impossible to remember all your favorite websites' addresses, especially if they use IPv6.
+That's why domain names were introduced: a simple string of text that's easy to remember, for example www.google.com.
+
+However, to send a request to a website, your computer still needs to know its IP address. That's where DNS comes in. It stands for Domain Name System, and is a way to translate a website's domain name to its IP address. On the Internet, there are a lot of DNS servers. Each DNS server has a long list of domain names and their corresponding IP addresses. Devices can connect to a DNS server and send a domain name, the DNS server will then respond with the IP address of the requested site.
+You could compare it to a telephone directory: you can look up a name to find the corresponding phone number.
+
+The DNS lookup happens completely in the background: when you go to a website in your browser, it will first send a request to a DNS server (this implies that the computer knows the IP address of the DNS server itself), wait for the response of the lookup, and then send the actual request to the right IP address.
+     
+     ### mDNS
+     <H6> DNS works great for normal sites on the Internet, but most local networks don't have their own DNS server. This means that you can't reach local devices using a domain name, and you're stuck using IP addresses ...
+
+Fortunately, there's another way: multicast DNS, or mDNS.
+mDNS uses domain names with the .local suffix, for example http://esp8266.local. If your computer needs to send a request to a domain name that ends in .local, it will send a multicast query to all other devices on the LAN that support mDNS, asking the device with that specific domain name to identify itself. The device with the right name will then respond with another multicast and send its IP address. Now that your computer knows the IP address of the device, it can send normal requests.
+      
