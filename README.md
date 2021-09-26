@@ -147,7 +147,7 @@ UART0 also has hardware flow control on pins 15 and 13 (RTS0 and CTS0 resp.). Th
        <H6> The ESP8266 has one SPI connection available to the user, referred to as HSPI. It uses GPIO14 as CLK, 12 as MISO, 13 as MOSI and 15 as Slave Select (SS). It can be used in both Slave and Master mode (in software).
     ### GPIO overview
 
-        ![image](https://user-images.githubusercontent.com/42414598/134761263-23f06b7a-4ff5-48cb-bd42-600801d0c83a.png)
+![image](https://user-images.githubusercontent.com/42414598/134761263-23f06b7a-4ff5-48cb-bd42-600801d0c83a.png)
 
  ## The ESP8266 as a microcontroller - Software
   ### Digital I/O
