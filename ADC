@@ -1,0 +1,23 @@
+/*-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ANALOG TO DIGITAL CONVERTER 
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+
+const int analogpin= A0;  // ESP8266 Analog Pin ADC0 = A0
+
+int Value = 0;  // value read from the pot
+
+void setup() {
+  // initialize serial communication at 115200
+  Serial.begin(115200);
+}
+
+void loop() {
+  // read the analog in value
+  sensorValue = analogRead(analogpin);
+ 
+  // print the readings in the Serial Monitor
+  Serial.print("sensor = ");
+  Serial.print(Value);
+  
+  delay(1000);
+}
