@@ -1,0 +1,50 @@
+#include <ESP8266WiFi.h>
+#define ledPin 2
+ 
+int brightness = 0;
+int fadeAmount = 1;
+ 
+void setup() 
+{
+  Serial.begin(115200);
+  pinMode(ledPin,OUTPUT);
+}
+ 
+
+void loop() 
+{
+  
+  Serial.println("10% Duty Cycle");
+  analogWrite(ledPin,102);
+  delay(2000);
+ 
+  Serial.println("20% Duty Cycle");
+  analogWrite(ledPin,205);
+  delay(2000);
+ 
+  Serial.println("50% Duty Cycle");
+  analogWrite(ledPin,511);
+  delay(2000);
+ 
+  Serial.println("70% Duty Cycle");
+  analogWrite(ledPin,714);
+  delay(2000);
+ 
+  Serial.println("100% Duty Cycle");
+  analogWrite(ledPin,1023);
+  delay(2000);
+ 
+  
+  Serial.println("LED Fadding begins.....");
+  while(1)
+  {
+    analogWrite(ledPin, brightness);
+    brightness = brightness + fadeAmount;
+  
+    if (brightness <= 0 || brightness >= 1023) 
+    {
+      fadeAmount = -fadeAmount;
+    }
+    delay(10);
+  }
+}
